@@ -2,28 +2,18 @@
 
 ## Running
 
-```sh
-uv run pytest --cov=dead_letter_replayer   # tests with coverage report
-uv run python scripts/check.py      # every gate, as CI and the factory run it
+```bash
+python -m pytest tests/test_dead_letter_replayer.py
 ```
 
 ## Policy
 
-- Branch coverage of `src/dead_letter_replayer` must stay at or above 80 %; the gate fails below it.
-- Tests exercise the public API (`import dead_letter_replayer`) and assert every observable effect:
-  return values, raised exceptions and their messages.
-- Each bug fix starts with a failing test that reproduces it.
-- Tests are deterministic: no network, no wall clock, no dependence on test order.
+The provided source tree contains one test module, `tests/test_dead_letter_replayer.py`. It imports from `dead_letter_replayer` and uses in-memory helpers: `FakeSource`, `FakePublisher`, `FakeClock`, `FakeSleep`, `RecordingSource` and `RecordingPublisher`. Tests are deterministic and do not use network, wall clock or external services.
 
 ## Tiers
 
-- Local tier (every gate run, coverage measured here): unit and property tests, plus conformance on small
-  fixtures kept in the repository.
-- CI tier: conformance that needs an external tool or a download. Mark them `@pytest.mark.conformance`; `scripts/check.py` deselects them locally
-  (unless `FABRICA_CI=1`). The CI `conformance` job sets `FABRICA_CI=1` and runs the full suite. Tools are installed
-  by the optional `ci/conformance-setup.sh` (bash, CI only; verify every download against a pinned SHA-256), and
-  tagged tests skip cleanly when their tool is missing.
+There is one local test tier in the provided tree. No conformance tests, external tools, CI-only setup scripts or `tests/conftest.py` are present.
 
 ## Layout
 
-`tests/test_<module>.py` mirrors each public module. Shared fixtures go in `tests/conftest.py`.
+- `tests/test_dead_letter_replayer.py`: filter and replay tests. Test functions cover topics and error pattern (`test_filter_topics_and_error`), since/until bounds (`test_filter_since_until`), header matching (`test_filter_headers`), max attempts (`test_filter_max_attempts`), invalid pattern (`test_filter_invalid_pattern`), invalid headers (`test_filter_invalid_headers`) and the basic replay path (`test_basic_replay`), including report counts, publisher calls, replay headers and ledger counts. Helper classes provide fake source, publisher, clock and sleep objects and recording adapters.
