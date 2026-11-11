@@ -1,24 +1,32 @@
-"""
-Replay dead-lettered messages safely: filters by topic, error, time and headers, dry runs, rate
-limits, a replay ledger against double replays and broker-agnostic ports
+"""Safe replay of dead-lettered messages.
+
+This package provides a broker-agnostic mechanism to replay messages from a
+dead letter source to a publisher, with filtering, dry-run, rate limiting,
+and a ledger to ensure idempotency.
 """
 
 from __future__ import annotations
 
-__all__ = ["__version__", "normalize"]
+import logging
+
+from .errors import ReplayError, ReplayErrorCode
+from .ledger import Ledger
+from .models import DeadLetter, DeadLetterSource, Publisher, ReplayFilter
+from .replay import ReplayReport, replay
+
+logging.getLogger("dead_letter_replayer").addHandler(logging.NullHandler())
+
+__all__ = [
+    "DeadLetter",
+    "DeadLetterSource",
+    "Ledger",
+    "Publisher",
+    "ReplayError",
+    "ReplayErrorCode",
+    "ReplayFilter",
+    "ReplayReport",
+    "__version__",
+    "replay",
+]
 
 __version__ = "0.1.0"
-
-
-def normalize(value: str) -> str:
-    """Return ``value`` trimmed and lower-cased.
-
-    Placeholder API created by the template: replace it with the utility's real behavior.
-
-    Raises:
-        ValueError: if ``value`` is empty or only whitespace.
-    """
-    cleaned = value.strip()
-    if not cleaned:
-        raise ValueError("value must not be empty")
-    return cleaned.lower()
